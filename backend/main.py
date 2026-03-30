@@ -11,11 +11,12 @@ Endpoints:
   POST /recommendations   — Personalised environmental recommendations
   POST /chat              — AI assistant powered by Google Gemini
 """
-
+import logging
+logging.basicConfig(level=logging.INFO)
 import os
 import json
 import numpy as np
-import joblib
+import joblib   
 from pathlib import Path
 from typing import Optional
 
@@ -42,7 +43,8 @@ except ImportError:
 load_dotenv()
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
-ML_DIR         = Path(__file__).parent.parent / "ml-model"
+BASE_DIR = Path(__file__).resolve().parent.parent
+ML_DIR = BASE_DIR / "ml-model"
 
 # ─────────────────────────────────────────────
 # LOAD ONNX WEATHER MODEL
@@ -52,9 +54,9 @@ onnx_session    = None
 onnx_input_name = None
 
 try:
-    _onnx_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "weather_model.ONE.onnx")
-    if _ORT_AVAILABLE and os.path.exists(_onnx_path):
-        onnx_session    = ort.InferenceSession(_onnx_path)
+    _onnx_path = ML_DIR / "weather_model.ONNX"
+    if _ORT_AVAILABLE and _onnx_path.exists():
+        onnx_session    = ort.InferenceSession(str(_onnx_path))
         onnx_input_name = onnx_session.get_inputs()[0].name
         print("✅  ONNX weather model loaded")
     else:
@@ -134,14 +136,14 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origin_regex=r"^https?://(localhost|127\.0\.0\.1|192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+)(:\d+)?$",
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 # Serve uploaded images
-_uploads_dir = Path(__file__).parent.parent / "uploads"
+_uploads_dir = BASE_DIR / "uploads"
 _uploads_dir.mkdir(exist_ok=True)
 app.mount("/uploads", StaticFiles(directory=str(_uploads_dir)), name="uploads")
 
@@ -757,3 +759,9 @@ def predict_weekly_temperature(
 
     return WeeklyForecastResponse(days=ordered_days, temperature=predictions)
 
+if __name__ == "__main__":
+    import uvicorn
+    port = int(os.environ.get("PORT", 10000))
+    uvicorn.run("main:app", host="0.0.0.0", port=port)
+
+    

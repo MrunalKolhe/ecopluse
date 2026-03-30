@@ -41,21 +41,47 @@ router = APIRouter(prefix="/api", tags=["civic"])
 # AI ISSUE DETECTION (rule-based fallback)
 # ─────────────────────────────────────────
 
+import re
+
 def detect_issue_from_description(description: str) -> tuple[str, str]:
     """
     Rule-based issue detection from description text.
     In production this would call the YOLO model.
     """
-    desc_lower = (description or "").lower()
+    clean_desc = (description or "").lower().strip()
     
-    if any(w in desc_lower for w in ["garbage", "trash", "waste", "litter", "plastic", "bottle"]):
+    if not clean_desc or clean_desc.replace("-", "").strip() == "":
         return "Garbage", "Waste Management"
-    elif any(w in desc_lower for w in ["pothole", "road", "crack", "damage", "broken road"]):
-        return "Pothole", "Road Department"
-    elif any(w in desc_lower for w in ["light", "streetlight", "lamp", "electricity", "dark", "pole"]):
+
+    # Use regex word boundaries to prevent 'wa' from matching 'water' or 'we' matching 'week'
+    def has_word(words_list):
+        pattern = r'\b(?:' + '|'.join(re.escape(w) for w in words_list) + r')\b'
+        return bool(re.search(pattern, clean_desc))
+
+    # Specific civic issues first (because "broken streetlight" has "broken" but should be streetlight)
+    if has_word(["light", "streetlight", "lamp", "electricity", "dark", "pole"]):
         return "Streetlight Issue", "Electricity Department"
-    else:
-        return "Unknown", "General Civic Department"
+    elif has_word(["water", "leak", "pipe", "drain", "sewage", "gutter", "flood"]):
+        return "Water & Drainage", "Water Department"
+    elif has_word(["pothole", "pathol", "road", "crack", "damage", "broken", "pit"]):
+        return "Pothole", "Road Department"
+
+    # Waste specific categories
+    if has_word(["e-waste", "ewaste", "electronic", "battery", "phone", "laptop"]):
+        return "E-Waste", "Waste Management"
+    elif has_word(["wet", "food", "kitchen", "organic"]):
+        return "Wet Waste", "Waste Management"
+    elif has_word(["dry", "paper", "cardboard", "box", "packaging"]):
+        return "Dry Waste", "Waste Management"
+    elif has_word(["hazard", "chemical", "medical", "paint"]):
+        return "Hazardous Waste", "Waste Management"
+        
+    # General Garbage (checked last to avoid overlapping specificity)
+    if has_word(["garbage", "trash", "waste", "litter", "plastic", "bottle", "dump", "bin", "dirt"]) or "we " in clean_desc or "wa " in clean_desc:
+        return "Garbage", "Waste Management"
+
+    # Ultimate fallback instead of Unknown
+    return "Garbage", "Waste Management"
 
 
 def get_severity(issue_type: str) -> str:
@@ -172,6 +198,9 @@ async def submit_report(
 
     # Save image
     image_path = None
+    yolo_issue = "Unknown"
+    yolo_conf = 0.0
+
     if image is not None:
         ext = Path(image.filename).suffix.lower()
         if ext not in ALLOWED_EXTENSIONS:
@@ -182,8 +211,29 @@ async def submit_report(
             shutil.copyfileobj(image.file, f)
         image_path = f"/uploads/{filename}"
 
-    # Detect issue from description (and optionally image)
+        # 🧠 YOLO Inference (Privacy Blur + Issue Detection)
+        try:
+            from cv_inference import process_civic_image
+            # Pass absolute path to YOLO
+            abs_dest = str(dest.absolute())
+            yolo_issue, yolo_conf = process_civic_image(abs_dest)
+            print(f"🤖 YOLOv8 Detected: {yolo_issue} (Conf: {yolo_conf})")
+        except Exception as e:
+            print(f"⚠️ YOLO integration failed: {e}")
+
+    # Detect issue from description 
     issue_type, department = detect_issue_from_description(description)
+
+    # 🚀 SMART FUSION: Text + YOLO
+    # If the text detection is generic (defaulted to Garbage/Unknown),
+    # but YOLO confidently detected a specific issue, override it!
+    if issue_type in ["Unknown", "Garbage", "Waste Management"] and yolo_issue not in ["Unknown", "Garbage"]:
+        issue_type = yolo_issue
+        if issue_type == "Pothole":
+            department = "Road Department"
+        elif issue_type == "Streetlight Issue":
+            department = "Electricity Department"
+
     severity = get_severity(issue_type)
 
     report = CivicReport(
