@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 from typing import Optional, List
 from datetime import datetime
 
@@ -26,7 +26,7 @@ class UserResponse(BaseModel):
     created_at: datetime
 
     class Config:
-        from_attributes = True
+        orm_mode = True  # Pydantic v1 — required for SQLAlchemy model serialization
 
 class LoginResponse(BaseModel):
     message: str
@@ -46,7 +46,7 @@ class DailyInputResponse(DailyInputCreate):
     user_id: str
 
     class Config:
-        from_attributes = True
+        orm_mode = True  # Pydantic v1
 
 class EcoScoreModel(BaseModel):
     water_credit: float = 0.0
@@ -57,14 +57,14 @@ class EcoScoreModel(BaseModel):
     debt: float = 0.0
 
     class Config:
-        from_attributes = True
+        orm_mode = True  # Pydantic v1
 
 class BadgeModel(BaseModel):
     badge_id: str
     earned: bool
 
     class Config:
-        from_attributes = True
+        orm_mode = True  # Pydantic v1
 
 class WasteDecisionModel(BaseModel):
     item_name: str
@@ -73,7 +73,7 @@ class WasteDecisionModel(BaseModel):
     timestamp: str
 
     class Config:
-        from_attributes = True
+        orm_mode = True  # Pydantic v1
 
 class DailyGreenIndexModel(BaseModel):
     date: str
@@ -81,4 +81,4 @@ class DailyGreenIndexModel(BaseModel):
     trend: str = "stable"
 
     class Config:
-        from_attributes = True
+        orm_mode = True  # Pydantic v1
