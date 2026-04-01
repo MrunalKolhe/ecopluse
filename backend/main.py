@@ -185,7 +185,7 @@ _uploads_dir = BASE_DIR / "uploads"
 _uploads_dir.mkdir(exist_ok=True)
 app.mount("/uploads", StaticFiles(directory=str(_uploads_dir)), name="uploads")
 
-# Initialize Database (safe — app starts even if DB is unavailable)
+# ── Import routers and register them ─────────────────────────────────────────
 try:
     from database import engine
     from models import Base
@@ -193,15 +193,28 @@ try:
     from routers import auth_router, data_router
     from routers import civic_router
 
-    Base.metadata.create_all(bind=engine)
-
     # Include Routers
     app.include_router(auth_router.router)
     app.include_router(data_router.router)
     app.include_router(civic_router.router)
-    print("✅  Database and routers initialized")
+    print("✅  Routers registered")
 except Exception as e:
-    print(f"❌  Database/router initialization failed: {e}")
+    print(f"❌  Router initialization failed: {e}")
+    engine = None
+    Base = None
+
+
+@app.on_event("startup")
+def startup():
+    """Create all database tables on app startup."""
+    if engine is not None and Base is not None:
+        try:
+            Base.metadata.create_all(bind=engine)
+            print("✅  Database tables created/verified")
+        except Exception as e:
+            print(f"❌  Database table creation failed: {e}")
+    else:
+        print("⚠️  Skipping DB table creation — engine not available")
 
 # ─────────────────────────────────────────────
 # REQUEST / RESPONSE MODELS
