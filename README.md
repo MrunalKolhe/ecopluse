@@ -4,7 +4,7 @@ EcoPulse is a Green-Tech full-stack web platform designed to promote environment
 
 ---
 
-## 🚀 Problem Statement
+## 🚀 Why EcoPulse?
 
 Air pollution, climate change, and unsustainable daily habits are growing concerns globally.
 
@@ -107,6 +107,18 @@ Users log:
 
 ---
 
+## 📌 Project Impact
+
+EcoPulse encourages sustainable habits by connecting
+daily user activities with measurable environmental impact.
+
+The platform helps users:
+- Understand pollution levels
+- Improve eco-friendly behavior
+- Report civic issues
+- Track long-term sustainability goals
+
+
 ## 🛠 Tech Stack
 
 ### 💻 Frontend
@@ -118,12 +130,27 @@ Users log:
 ### ⚙️ Backend
 - Python (FastAPI)  
 
-### 🧠 Machine Learning
-- ONNX-based models for AQI prediction  
+### 🧠 Machine Learning & Analytics
+- Python
+- ONNX Runtime
+- Data Processing
+- AQI Forecasting Models
 
 ### 🌐 APIs
 - OpenWeather API  
 - Air Pollution API  
+
+---
+
+## 📂 Project Structure
+
+frontend/
+backend/
+ml-model/
+public/
+uploads/
+
+README.md
 
 ---
 
