@@ -142,6 +142,48 @@ The platform helps users:
 
 ---
 
+## 🏗️ System Architecture
+
+```text
+                    ┌──────────────────┐
+                    │      Users       │
+                    └────────┬─────────┘
+                             │
+                             ▼
+                ┌────────────────────────┐
+                │   Next.js Frontend     │
+                │  Dashboard & UI Layer  │
+                └────────┬───────────────┘
+                         │ API Requests
+                         ▼
+                ┌────────────────────────┐
+                │    FastAPI Backend     │
+                │ Business Logic Layer   │
+                └────────┬───────────────┘
+                         │
+        ┌────────────────┼────────────────┐
+        ▼                ▼                ▼
+
+ ┌────────────┐   ┌────────────┐   ┌─────────────┐
+ │ OpenWeather│   │ AQI APIs   │   │ ML Models   │
+ │    API     │   │ Pollution  │   │ Forecasting │
+ └────────────┘   └────────────┘   └─────────────┘
+
+                         │
+                         ▼
+
+                ┌────────────────────────┐
+                │ User Analytics Engine  │
+                │ Eco Score Calculation  │
+                └────────┬───────────────┘
+                         │
+                         ▼
+
+                ┌────────────────────────┐
+                │ Leaderboards & Reports │
+                └────────────────────────┘
+
+
 ## 📂 Project Structure
 
 frontend/
