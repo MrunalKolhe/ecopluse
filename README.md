@@ -183,7 +183,7 @@ The platform helps users:
                 │ Leaderboards & Reports │
                 └────────────────────────┘
 
-
+```
 ## 📂 Project Structure
 
 frontend/
@@ -207,6 +207,15 @@ README.md
 ### 🚯 Civic Issue Admin Panel (Core Feature 🚀)
 <img src="./screenshots-civic-admin.png" width="800"/>
 ---
+
+## 🚀 Challenges Solved
+
+- Designed a complete User → Admin → Government issue escalation workflow.
+- Integrated weather and AQI APIs into a unified dashboard.
+- Developed a daily habit tracking mechanism with locked submissions.
+- Built an environmental impact scoring system based on user activities.
+- Visualized pollution trends using interactive heatmaps and analytics.
+- Managed real-time environmental data efficiently within a full-stack architecture.
 
 ## 🎯 Use Cases
 
