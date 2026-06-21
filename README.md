@@ -186,13 +186,23 @@ The platform helps users:
 ```
 ## 📂 Project Structure
 
-frontend/
-backend/
-ml-model/
-public/
-uploads/
-
-README.md
+```text
+EcoPulse/
+│
+├── app/                 # Next.js App Router pages
+├── backend/             # FastAPI backend services
+├── components/          # Reusable UI components
+├── hooks/               # Custom React hooks
+├── lib/                 # Utility functions
+├── ml-model/            # AQI forecasting models
+├── public/              # Static assets
+├── uploads/             # User-uploaded issue images
+│
+├── package.json
+├── next.config.mjs
+├── README.md
+└── tsconfig.json
+```
 
 ---
 
